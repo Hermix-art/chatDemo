@@ -13,6 +13,7 @@ public class Client {
     private volatile boolean isClientConnected;
     protected Connection connection;
 
+
     public static void main(String[] args) {
         new Client().run();
     }
@@ -32,9 +33,11 @@ public class Client {
                         if (shouldTakeTextFromConsole())
                             connection.writeMessage(new Message(MessageType.TEXT_MESSAGE, newTextMessage));
                     }
+
                     ConsoleManager.writeToConsole("You were disconnected");
 
                 } else ConsoleManager.writeToConsole("Error during client connection");
+
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
@@ -43,6 +46,7 @@ public class Client {
     }
 
     public class SocketReceiverThread extends Thread {
+        protected String userName;
 
         @Override
         public void run() {
@@ -50,11 +54,11 @@ public class Client {
                 Socket socket = new Socket(getServerAddress(), getServerPort());
                 connection = new Connection(socket);
                 serverHandshake();
-
-                //mainloop
+                clientMainLoop();
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
+                changeConnectionStatus(false);
             }
         }
 
@@ -63,11 +67,13 @@ public class Client {
                 Message messageFromServer = connection.readMessage();
                 if (messageFromServer.getMessageType() == MessageType.NAME_REQUEST) {
                     String name = getUserName();
+                    userName = name;
                     connection.writeMessage(new Message(MessageType.USER_NAME, name));
                 }
                 if (messageFromServer.getMessageType() == MessageType.NAME_ACCEPTED) {
                     changeConnectionStatus(true);
-                }
+                    return;
+                } else throw new IOException("Unknown inappropriate message type");
             }
         }
 
@@ -101,7 +107,7 @@ public class Client {
         }
 
         protected void informAboutRemovedUser(Message messageFromServer) {
-            ConsoleManager.writeToConsole(messageFromServer.getMessageData() + " was removed from chat");
+            ConsoleManager.writeToConsole(messageFromServer.getMessageData() + " left the chat");
         }
 
         protected void processIncomingMessage(Message messageFromServer) {
