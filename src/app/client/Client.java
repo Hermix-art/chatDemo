@@ -21,7 +21,7 @@ public class Client {
     public void run() {
         SocketReceiverThread thread = getNewSocketReceiverThread();
         thread.setDaemon(true);
-        thread.run();
+        thread.start();
         synchronized (this) {
             try {
                 wait();//waiting for "connected" status
@@ -69,8 +69,7 @@ public class Client {
                     String name = getUserName();
                     userName = name;
                     connection.writeMessage(new Message(MessageType.USER_NAME, name));
-                }
-                if (messageFromServer.getMessageType() == MessageType.NAME_ACCEPTED) {
+                } else if (messageFromServer.getMessageType() == MessageType.NAME_ACCEPTED) {
                     changeConnectionStatus(true);
                     return;
                 } else throw new IOException("Unknown inappropriate message type");
@@ -145,6 +144,14 @@ public class Client {
 
     protected SocketReceiverThread getNewSocketReceiverThread() {
         return new SocketReceiverThread();
+    }
+    protected void sendTextMessage(String text) {
+        try {
+            connection.writeMessage(new Message(MessageType.TEXT_MESSAGE, text));
+        } catch (IOException e) {
+            System.out.println("Error during message sending");
+            isClientConnected = false;
+        }
     }
 
 
