@@ -16,7 +16,7 @@ public class ClientGuiView {
 
     public ClientGuiView(ClientGuiController controller) {
         this.controller = controller;
-        initialize();
+        initialize(); // starts when we create GUIController object
     }
 
     private void initialize() {
@@ -34,22 +34,22 @@ public class ClientGuiView {
 
         textField.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.sendTextMessage(textField.getText());
+            public void actionPerformed(ActionEvent e) { // stays here to read messages from keyboard and send them to server, using socket
+                controller.sendTextMessage(textField.getText()); //GUI takes role of main thread in Client main method (sends messages)
                 textField.setText("");
             }
         });
 
     }
 
-    private String getServerAddress() {
+    public String getServerAddress() {
         return JOptionPane.showInputDialog(frame,
                 "Provide server address",
                 "Client configuration",
                 JOptionPane.QUESTION_MESSAGE);
     }
 
-    private int getPort() {
+    public int getPort() {
         while (true) {
             String portString = JOptionPane.showInputDialog(frame,
                     "Provide port",
@@ -66,14 +66,14 @@ public class ClientGuiView {
 
     }
 
-    private String getUserName() {
+    public String getUserName() {
         return JOptionPane.showInputDialog(frame,
                 "Provide your name",
                 "Client configuration",
                 JOptionPane.QUESTION_MESSAGE);
     }
 
-    private void refreshUsers() {
+    public void refreshUsers() {
         StringBuilder sb = new StringBuilder();
         Set<String> users = controller.getModel().getCurrentUsers();
         for (String user : users) {
@@ -83,12 +83,12 @@ public class ClientGuiView {
 
     }
 
-    private void refreshMessage() {
+    public void refreshMessage() {
         String lastMessage = controller.getModel().getLastAvailableMessage() + "\n";
         messagesArea.append(lastMessage);
     }
 
-    private void updateConnectionStatus(boolean isConnected) {
+    public void updateConnectionStatus(boolean isConnected) {
         textField.setEditable(isConnected);
         if (isConnected) {
             JOptionPane.showMessageDialog(frame,
