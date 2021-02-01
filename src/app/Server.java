@@ -54,7 +54,7 @@ public class Server {
             ConsoleManager.writeToConsole("New connection " + socket.getRemoteSocketAddress());
             try (Connection connection = new Connection(socket)){
 
-                String userName = newUserVerification(connection);
+                String userName = userHandshake (connection);
                 notifyUser(userName, connection);
                 broadcastMessage(new Message(MessageType.USER_ADDED, userName));
 
@@ -67,9 +67,10 @@ public class Server {
                 e.printStackTrace();
             }
 
+
         }
 
-        private String newUserVerification(Connection connection) throws IOException, ClassNotFoundException {
+        private String userHandshake(Connection connection) throws IOException, ClassNotFoundException {
                 connection.writeMessage(new Message(MessageType.NAME_REQUEST, "Hello, please provide your name"));
                 Message messageFromUser = connection.readMessage();
 
@@ -82,7 +83,7 @@ public class Server {
                     activeUsers.put(userName, connection);
                     return userName;
 
-                } else return newUserVerification(connection);
+                } else return userHandshake (connection);
 
         }
 
